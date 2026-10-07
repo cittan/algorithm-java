@@ -23,4 +23,14 @@ public class TwoSum {
         }
         return new int[0];
     }
+
+    /**
+     * 程序入口：供 Code Runner 运行，用于本地验证算法结果
+     *
+     * @param args 命令行参数（未使用）
+     */
+    public static void main(String[] args) {
+        int[] result = new TwoSum().twoSum(new int[]{2, 7, 11, 15}, 9);
+        System.out.println("结果下标: " + result[0] + ", " + result[1]);
+    }
 }
