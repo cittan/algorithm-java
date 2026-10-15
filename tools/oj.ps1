@@ -1,4 +1,4 @@
-﻿<#
+﻿﻿<#
 .SYNOPSIS
     OJ 风格样例批量测试器（ACM 输入输出）
 .DESCRIPTION

@@ -77,7 +77,9 @@ public class Completable {
         CompletableFuture<String> res = f1.thenCombine(f2, (a, b) -> a + b);
     
         /**
-         * allOf 拿到这两个结果但不返回结果，要自己从各个 future 里取,all.join需要在方法体中
+         * 多个异步任务并行的情况
+         * allOf 等待多个任务完成但不返回结果，要自己从各个 future 里取,all.join需要在方法体中，可以在后面接supplyAsync
+         * anyOf 等待一个任务完成但不返回结果
          */
         CompletableFuture<Void> all = CompletableFuture.allOf(f1, f2);
         all.join();
