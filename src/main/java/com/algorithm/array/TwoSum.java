@@ -1,45 +1,64 @@
-package com.algorithm.array;
+import java.util.*;
 
-import java.util.Scanner;
-
-/**
- * LeetCode 1. 两数之和（ACM 输入输出模板）
- * 样例文件放在 testcases/TwoSum/ 目录，成对命名 1.in / 1.out
- * 输入约定：第一行为 n target，第二行为 n 个整数
- */
 public class TwoSum {
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        // 数组长度与目标和
-        int n = sc.nextInt();
-        int target = sc.nextInt();
-        // 读取 n 个整数构成目标数组
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) {
-            nums[i] = sc.nextInt();
-        }
+    public static int findMinMaxOccupancy(int[] resources, int[] taskLengths) {
+        int n = resources.length, m = taskLengths.length;
+        if (m == 0) return 0;
 
-        int[] ans = twoSum(nums, target);
-        System.out.println(ans[0] + " " + ans[1]);
-        sc.close();
+        // 快速可行性检查：总长度超过资源数必然无解
+        long totalLen = 0;
+        for (int l : taskLengths) totalLen += l;
+        if (totalLen > n) throw new IllegalArgumentException("任务总长度超过资源数，无解");
+
+        // 在排序去重后的资源值上二分（答案一定是某个 resources[i]）
+        int[] sorted = Arrays.stream(resources).distinct().sorted().toArray();
+
+        int lo = 0, hi = sorted.length - 1, ans = sorted[hi];
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;
+            if (canPlaceAll(resources, taskLengths, sorted[mid])) {
+                ans = sorted[mid];
+                hi = mid - 1;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return ans;
     }
 
     /**
-     * 在数组中找出和为 target 的两个数的下标
-     *
-     * @param nums   目标数组
-     * @param target 目标和
-     * @return 两个数的下标；不存在时返回空数组
+     * 验证：O(n + m log n)
+     * 好位置 = 值 <= maxVal 的位置；前缀和 O(1) 判定窗口是否全好；
+     * 任务按顺序推进 pos，天然不重叠，无需 occupied 数组。
      */
-    public static int[] twoSum(int[] nums, int target) {
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = i + 1; j < nums.length; j++) {
-                if (nums[i] + nums[j] == target) {
-                    return new int[]{i, j};
-                }
+    private static boolean canPlaceAll(int[] resources, int[] taskLengths, int maxVal) {
+        int n = resources.length;
+        int[] prefix = new int[n + 1];
+        for (int i = 0; i < n; i++)
+            prefix[i + 1] = prefix[i] + (resources[i] <= maxVal ? 1 : 0);
+
+        int pos = 0;
+        for (int len : taskLengths) {
+            // 二分找 [pos, n-len] 中第一个使窗口全好的起点
+            int lo = pos, hi = n - len, found = -1;
+            while (lo <= hi) {
+                int mid = (lo + hi) >>> 1;
+                if (prefix[mid + len] - prefix[mid] == len) { found = mid; hi = mid - 1; }
+                else lo = mid + 1;
             }
+            if (found < 0) return false;
+            pos = found + len;
         }
-        return new int[0];
+        return true;
+    }
+
+    public static void main(String[] args) {
+        int[] resources = {3, 1, 2, 5, 3, 1, 2};
+        int[] taskLengths = {2, 3};
+        System.out.println(findMinMaxOccupancy(resources, taskLengths)); // 3
+
+        // 无解示例：显式抛异常，而不是静默返回一个误导值
+        // findMinMaxOccupancy(new int[]{1, 2}, new int[]{2, 2});
     }
 }
